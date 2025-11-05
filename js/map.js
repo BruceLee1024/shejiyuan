@@ -159,7 +159,14 @@
       });
 
       // Build series data based on actual feature names present in the GeoJSON
-      const mapData = Array.from(featureNames).map(n => ({ name: n, value: countsByFeature[n] || 0 }));
+      // Try both exact match and normalized short name to avoid name-mismatch zero values
+      const mapData = Array.from(featureNames).map(n => {
+        const short = toFeatureName(n);
+        const val = (countsByFeature[n] !== undefined)
+          ? countsByFeature[n]
+          : (countsByFeature[short] !== undefined ? countsByFeature[short] : 0);
+        return { name: n, value: val };
+      });
       const maxVal = mapData.length ? Math.max(...mapData.map(d => d.value)) : 0;
 
       const option = {
@@ -232,7 +239,7 @@
       chart.on('click', params => {
         const regionName = params.name;
         const detailEl = document.getElementById('regionDetail');
-        const companies = companiesByFeature[regionName];
+        const companies = companiesByFeature[regionName] || companiesByFeature[toFeatureName(regionName)];
 
         const companiesList = companies ? companies.split('；') : [];
         const itemsHtml = companiesList.length
