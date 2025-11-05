@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国工程勘察设计综合甲级资质企业分布</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>中国工程勘察设计综合甲级资质企业</h1>
+            <p class="subtitle">全国分布概览</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card fade-in" style="animation-delay: 0.1s">
+                <div class="stat-header">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-label">企业总数</div>
+                </div>
+                <div class="stat-number" id="totalCompanies">93</div>
+            </div>
+            <div class="stat-card fade-in" style="animation-delay: 0.2s">
+                <div class="stat-header">
+                    <div class="stat-icon">📍</div>
+                    <div class="stat-label">覆盖省市</div>
+                </div>
+                <div class="stat-number" id="coveredRegions">21</div>
+            </div>
+            <div class="stat-card fade-in" style="animation-delay: 0.3s">
+                <div class="stat-header">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-label">北京市企业</div>
+                </div>
+                <div class="stat-number" id="beijingCompanies">23</div>
+            </div>
+        </div>
+
+        <div class="chart-section fade-in" style="animation-delay: 0.4s">
+            <h2 class="section-title">企业数量 TOP 10 地区</h2>
+            <div class="bar-chart" id="barChart"></div>
+        </div>
+
+        <div class="map-section fade-in" style="animation-delay: 0.5s">
+            <h2 class="section-title">省份热力图</h2>
+            <div id="chinaMap" class="map-container"></div>
+            <div id="regionDetail" class="detail-panel"></div>
+        </div>
+
+        <div class="regions-grid" id="regionsGrid"></div>
+
+        <!-- Modal Overlay for Company Details -->
+        <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                <button class="modal-close" aria-label="关闭">×</button>
+                <h3 id="modalTitle" class="modal-title">企业详情</h3>
+                <div id="modalContent" class="modal-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/company.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/modal.js"></script>
+</body>
+</html>
