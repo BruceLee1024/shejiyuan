@@ -80,7 +80,9 @@
 
   function loadChinaGeoJSON() {
     const sources = [
-      // Prefer public npm CDNs first to reduce regional 403s
+      // Local bundled file preferred to avoid external CDN/CORS/403 issues
+      'maps/china.json',
+      // Public npm CDNs
       'https://fastly.jsdelivr.net/npm/echarts@5/map/json/china.json',
       'https://cdn.jsdelivr.net/npm/echarts@5/map/json/china.json',
       'https://unpkg.com/echarts@5/map/json/china.json',
