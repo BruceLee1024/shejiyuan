@@ -62,9 +62,46 @@
   const mapData = allProvinces.map(name => ({ name, value: provinceCounts[name] || 0 }));
   const maxVal = Math.max(...mapData.map(d => d.value));
 
-  // Fetch China GeoJSON and render
-  fetch('https://geo.datav.aliyun.com/areas_v3/bound/geojson?code=100000_full')
-    .then(r => r.json())
+  // Fetch China GeoJSON and render with robust fallback
+  function fetchJSON(url) {
+    return fetch(url, { cache: 'no-cache' }).then(async (r) => {
+      const contentType = r.headers.get('content-type') || '';
+      if (!r.ok) {
+        const text = await r.text();
+        throw new Error(`HTTP ${r.status} from ${url}: ${text.slice(0, 120)}...`);
+      }
+      if (!/application\/json|json/.test(contentType)) {
+        const text = await r.text();
+        throw new Error(`Non-JSON response from ${url}: ${text.slice(0, 120)}...`);
+      }
+      return r.json();
+    });
+  }
+
+  function loadChinaGeoJSON() {
+    const sources = [
+      // Prefer public npm CDNs first to reduce regional 403s
+      'https://fastly.jsdelivr.net/npm/echarts@5/map/json/china.json',
+      'https://cdn.jsdelivr.net/npm/echarts@5/map/json/china.json',
+      'https://unpkg.com/echarts@5/map/json/china.json',
+      // Aliyun as a later fallback
+      'https://geo.datav.aliyun.com/areas_v3/bound/geojson?code=100000_full'
+    ];
+
+    let lastError = null;
+    const tryNext = (i) => {
+      if (i >= sources.length) return Promise.reject(lastError || new Error('No sources available'));
+      const url = sources[i];
+      return fetchJSON(url).catch(err => {
+        lastError = err;
+        console.warn(`地图数据源失败，尝试备用源(${i + 1}/${sources.length}):`, url, err.message);
+        return tryNext(i + 1);
+      });
+    };
+    return tryNext(0);
+  }
+
+  loadChinaGeoJSON()
     .then(geoJson => {
       echarts.registerMap('china', geoJson);
 
@@ -163,5 +200,9 @@
     })
     .catch(err => {
       console.error('加载中国地图数据失败：', err);
+      const detailEl = document.getElementById('regionDetail');
+      if (detailEl) {
+        detailEl.innerHTML = '<div class="company-item">地图数据加载失败，请刷新或切换网络后重试。</div>';
+      }
     });
 })();
