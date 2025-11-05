@@ -107,6 +107,46 @@
     .then(geoJson => {
       echarts.registerMap('china', geoJson);
 
+      // Build feature name set from loaded GeoJSON
+      const featureNames = new Set(
+        Array.isArray(geoJson.features)
+          ? geoJson.features.map(f => (f.properties && f.properties.name) || '')
+          : []
+      );
+
+      // Convert normalized province names (e.g., '河北省', '广西壮族自治区')
+      // to feature names in GeoJSON (e.g., '河北', '广西').
+      function toFeatureName(name) {
+        const special = {
+          '广西壮族自治区': '广西',
+          '新疆维吾尔自治区': '新疆',
+          '西藏自治区': '西藏',
+          '内蒙古自治区': '内蒙古',
+          '宁夏回族自治区': '宁夏',
+          '香港特别行政区': '香港',
+          '澳门特别行政区': '澳门',
+          '重庆市': '重庆',
+          '北京市': '北京',
+          '上海市': '上海',
+          '天津市': '天津',
+          '台湾省': '台湾'
+        };
+        if (special[name]) return special[name];
+        // Strip common suffixes like 省/市/自治区
+        return name.replace(/(省|市|自治区|特别行政区)$/u, '');
+      }
+
+      // Map counts to feature names for correct coloring
+      const countsByFeature = {};
+      Object.keys(provinceCounts).forEach(n => {
+        const fname = toFeatureName(n);
+        countsByFeature[fname] = (countsByFeature[fname] || 0) + (provinceCounts[n] || 0);
+      });
+
+      // Build series data based on actual feature names present in the GeoJSON
+      const mapData = Array.from(featureNames).map(n => ({ name: n, value: countsByFeature[n] || 0 }));
+      const maxVal = mapData.length ? Math.max(...mapData.map(d => d.value)) : 0;
+
       const option = {
         tooltip: {
           trigger: 'item',
