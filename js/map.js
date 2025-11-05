@@ -143,6 +143,21 @@
         countsByFeature[fname] = (countsByFeature[fname] || 0) + (provinceCounts[n] || 0);
       });
 
+      // Map company lists to feature names for click/details panel
+      const companiesByFeature = {};
+      Object.keys(provinceCompanies).forEach(n => {
+        const fname = toFeatureName(n);
+        const val = provinceCompanies[n] || '';
+        // Prefer non-empty; if multiple normalized names map to same feature, merge lists
+        if (val) {
+          if (companiesByFeature[fname]) {
+            companiesByFeature[fname] = `${companiesByFeature[fname]}；${val}`;
+          } else {
+            companiesByFeature[fname] = val;
+          }
+        }
+      });
+
       // Build series data based on actual feature names present in the GeoJSON
       const mapData = Array.from(featureNames).map(n => ({ name: n, value: countsByFeature[n] || 0 }));
       const maxVal = mapData.length ? Math.max(...mapData.map(d => d.value)) : 0;
@@ -217,7 +232,7 @@
       chart.on('click', params => {
         const regionName = params.name;
         const detailEl = document.getElementById('regionDetail');
-        const companies = provinceCompanies[regionName];
+        const companies = companiesByFeature[regionName];
 
         const companiesList = companies ? companies.split('；') : [];
         const itemsHtml = companiesList.length
